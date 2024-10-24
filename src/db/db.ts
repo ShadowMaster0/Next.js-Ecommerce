@@ -1,22 +1,21 @@
+// src/db/db.ts
 import { PrismaClient } from "@prisma/client";
 
-const prismaClientSingleton = () => {
-  return new PrismaClient();
+// A singleton pattern to ensure we only have one instance of PrismaClient.
+const prismaClientSingleton = (): PrismaClient => {
+  if (!globalThis.prisma) {
+    globalThis.prisma = new PrismaClient();
+  }
+  return globalThis.prisma;
 };
 
-// Extending the global type definitions
+// Initialize and export the singleton instance
+const db = prismaClientSingleton();
+
+export default db;
+
+// Extend the global object to avoid TypeScript errors
 declare global {
   // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
-}
-
-// Ensure that 'prisma' can be set on 'globalThis'
-if (!globalThis.prisma) {
-  globalThis.prisma = prismaClientSingleton();
-}
-
-export default globalThis.prisma;
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.prisma = prismaClientSingleton();
 }
